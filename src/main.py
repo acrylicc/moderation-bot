@@ -86,14 +86,56 @@ async def on_message(message):
 async def on_member_update(before, after):
     if before.roles != after.roles:
         roles = [role.id for role in after.roles]
-        role = bot.get_guild(1381383838399332454).get_role(SUPER_SUPPORTER_ROLE_ID)
+        super_supporter = bot.get_guild(GUILD_ID).get_role(SUPER_SUPPORTER_ROLE_ID)
 
         # If they have the two roles needed, but dont have the new role
         if MEMBER_TIER_2_ROLE_ID in roles and SUB_TIER_3_ROLE_ID in roles and SUPER_SUPPORTER_ROLE_ID not in roles:
-            await after.add_roles(role)
+            await after.add_roles(super_supporter)
         # Removing the role if they no longer have the prereqs
         elif SUPER_SUPPORTER_ROLE_ID in roles and MEMBER_TIER_2_ROLE_ID not in roles or SUB_TIER_3_ROLE_ID not in roles:
-            await after.remove_roles(role)
+            await after.remove_roles(super_supporter)
+
+        # If a user somehow has more than one color role, which should not be possible
+        #  This command will remove all but one of them
+        count = 0
+        for i in range(len(roles)):
+            for j in range(len(COLOR_ROLE_IDS)):
+                if roles[i] == COLOR_ROLE_IDS[j] and count >= 1:
+                    await after.remove_roles(bot.get_guild(GUILD_ID).get_role(roles[i]))
+                elif roles[i] == COLOR_ROLE_IDS[j]:
+                    count = count + 1
+
+        # If a user has a color role for a normla role that they no longer have
+        if ART_PANEL_COLOR_ROLE_ID in roles and ART_PANEL_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(ART_PANEL_COLOR_ROLE_ID))
+        if MOD_COLOR_ROLE_ID in roles and MOD_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(MOD_COLOR_ROLE_ID))
+        elif SPECIAL_COLOR_ROLE_ID in roles and SPECIAL_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(SPECIAL_COLOR_ROLE_ID))
+        elif SUPER_SUPPORTER_COLOR_ROLE_ID in roles and SUPER_SUPPORTER_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(SUPER_SUPPORTER_COLOR_ROLE_ID))
+        elif MEMBER_TIER_2_COLOR_ROLE_ID in roles and MEMBER_TIER_2_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(MEMBER_TIER_2_COLOR_ROLE_ID))
+        elif MEMBER_TIER_1_COLOR_ROLE_ID in roles and MEMBER_TIER_2_ROLE_ID not in roles and MEMBER_TIER_1_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(MEMBER_TIER_1_COLOR_ROLE_ID))
+        elif MEMBER_COLOR_ROLE_ID in roles and MEMBER_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(MEMBER_COLOR_ROLE_ID))
+        elif SUB_TIER_3_COLOR_ROLE_ID in roles and SUB_TIER_3_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(SUB_TIER_3_COLOR_ROLE_ID))
+        elif SUB_TIER_2_COLOR_ROLE_ID in roles and SUB_TIER_3_ROLE_ID not in roles and SUB_TIER_2_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(SUB_TIER_2_COLOR_ROLE_ID))
+        elif SUB_TIER_1_COLOR_ROLE_ID in roles and SUB_TIER_3_ROLE_ID not in roles and SUB_TIER_2_ROLE_ID not in roles and SUB_TIER_1_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(SUB_TIER_1_COLOR_ROLE_ID))
+        elif SUB_COLOR_ROLE_ID in roles and SUB_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(SUB_COLOR_ROLE_ID))
+        elif BOOSTER_COLOR_ROLE_ID in roles and BOOSTER_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(BOOSTER_COLOR_ROLE_ID))
+        elif ARTIST_COLOR_ROLE_ID in roles and ARTIST_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(ARTIST_COLOR_ROLE_ID))
+        elif GOOBER_2_COLOR_ROLE_ID in roles and GOOBER_2_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(GOOBER_2_COLOR_ROLE_ID))
+        elif GOOBER_COLOR_ROLE_ID in roles and GOOBER_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(GOOBER_COLOR_ROLE_ID))            
 
 
 token = os.getenv("bot_token")

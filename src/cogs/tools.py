@@ -6,9 +6,159 @@ from datetime import timedelta, datetime, timezone
 import json
 import os
 
+class Colors(discord.ui.Select):
+    def __init__(self):
+        options = [
+            discord.SelectOption(label="Art Panel", emoji=ART_PANEL_ROLE_EMOJI),
+            discord.SelectOption(label="Moderator", emoji=MOD_ROLE_EMOJI),
+            discord.SelectOption(label="Special", emoji=SPECIAL_ROLE_EMOJI),
+            discord.SelectOption(label="Super Supporter", emoji=SUPER_SUPPORTER_ROLE_EMOJI),
+            discord.SelectOption(label="Jira Enthusiast", emoji=MEMBER_TIER_2_ROLE_EMOJI),
+            discord.SelectOption(label="Jira Fan", emoji=MEMBER_TIER_1_ROLE_EMOJI),
+            discord.SelectOption(label="Channel Member", emoji=MEMBER_ROLE_EMOJI),
+            discord.SelectOption(label="Tier 3", emoji=SUB_TIER_3_ROLE_EMOJI),
+            discord.SelectOption(label="Tier 2", emoji=SUB_TIER_2_ROLE_EMOJI),
+            discord.SelectOption(label="Tier 1", emoji=SUB_TIER_1_ROLE_EMOJI),
+            discord.SelectOption(label="Twitch Sub", emoji=SUB_ROLE_EMOJI),
+            discord.SelectOption(label="Booster", emoji=BOOSTER_ROLE_EMOJI),
+            discord.SelectOption(label="Artist", emoji=ARTIST_ROLE_EMOJI),
+            discord.SelectOption(label="Goober 2", emoji=GOOBER_2_ROLE_EMOJI),
+            discord.SelectOption(label="Goober", emoji=GOOBER_ROLE_EMOJI),
+            discord.SelectOption(label="None", emoji=X_EMOJI)
+        ]
+        super().__init__(placeholder="Choose an option...", min_values=1, max_values=1, options=options,custom_id="colors")
+
+    async def remove_colors(self, user_roles, interaction):
+        for i in range(len(user_roles)):
+            for j in range(len(COLOR_ROLE_IDS)):
+                if user_roles[i] == COLOR_ROLE_IDS[j]:
+                    await interaction.user.remove_roles(interaction.guild.get_role(user_roles[i]))
+
+    async def callback(self, interaction: discord.Interaction):
+        user_roles = [role.id for role in interaction.user.roles]
+        
+        if CREATORS_ROLE_ID in user_roles or SALAMI_ROLE_ID in user_roles or ACRYLIC_ROLE_ID in user_roles:
+            await interaction.response.send_message(f"{X_EMOJI} You have a role that is ranked higher than all role colors, meaning you cannot change your role color.", ephemeral=True)
+            return
+
+        if self.values[0] == "Art Panel":
+            if ART_PANEL_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(ART_PANEL_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Moderator":
+            if MOD_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(MOD_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Special":
+            if SPECIAL_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(SPECIAL_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Super Supporter":
+            if SUPER_SUPPORTER_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(SUPER_SUPPORTER_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Jira Enthusiast":
+            if MEMBER_TIER_2_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(MEMBER_TIER_2_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Jira Fan":
+            if MEMBER_TIER_1_ROLE_ID in user_roles or MEMBER_TIER_2_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(MEMBER_TIER_1_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` or `Jira Enthusiast` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Channel Member":
+            if MEMBER_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(MEMBER_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Tier 3":
+            if SUB_TIER_3_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(SUB_TIER_3_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Tier 2":
+            if SUB_TIER_2_ROLE_ID in user_roles or SUB_TIER_3_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(SUB_TIER_2_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` or `Tier 3` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Tier 1":
+            if SUB_TIER_1_ROLE_ID in user_roles or SUB_TIER_2_ROLE_ID in user_roles or SUB_TIER_3_ROLE_ID in user_roles: #could honestly change this to just check if it has the twitch sub role but eh
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(SUB_TIER_1_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}`, `Tier 2`, or `Tier 3` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Twitch Sub":
+            if SUB_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(SUB_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Booster":
+            if BOOSTER_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(BOOSTER_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Artist":
+            if ARTIST_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(ARTIST_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Goober 2":
+            if GOOBER_2_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(GOOBER_2_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Goober":
+            if GOOBER_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(GOOBER_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "None":
+            await self.remove_colors(user_roles,interaction)
+            await interaction.response.send_message(f"{CHECK_EMOJI} You have reset your role color to its defualt.", ephemeral=True)
+
+class ColorsView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+        self.add_item(Colors())
+
 class ToolsCog(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+        self.bot.add_view(ColorsView())
 
     tools = app_commands.Group(name="tools", description="Jira's Tools and Utilities")
 
@@ -455,3 +605,25 @@ class ToolsCog(commands.Cog):
                 await interaction.followup.send(f"{CHECK_EMOJI} Role embeds have been created.", ephemeral=True)
             else:
                 await interaction.followup.send(f"{WARNING_EMOJI} Role channel with ID {ROLE_INFO_CHANNEL_ID} not found.", ephemeral=True)
+
+    
+    @tools.command(name="role_colors", description="For creating the role color embed and dropdown in #role-colors.")
+    async def roles(self, interaction: discord.Interaction):
+        await interaction.response.send_message("Creating role color embed...", ephemeral=True)
+        author_roles = [role.id for role in interaction.user.roles]
+
+        # Permission check
+        if ACRYLIC_ROLE_ID not in author_roles:
+            await interaction.followup.send(f"{X_EMOJI} You don't have permission to use this command.", ephemeral=True)
+            return
+
+        file = discord.File(os.path.abspath('./img/RoleColors.png'), filename="RoleColors.png")
+
+        embed = discord.Embed(color=16772213,description=f"Almost all roles in this server come with their own unique role color. But what do you do if you like the color of one role, but you can't use it because you have another role that's higher rank? You use this feature!\n\nYou can change your role color to that of any other role you own using the dropdown menu below. This also works with Sub/Membership roles! You will be able to use the color from lower ranking tiers, provided you have one ranked higher. For example, someone with {MEMBER_TIER_2_ROLE_MENTION} can use the role color of {MEMBER_TIER_1_ROLE_MENTION}.\n\nRole colors do not override role icons, so you will still have the icon of your highest ranking role, despite your choice of role color.\n\nIf, for any reason, you lose the role associated with your role color of choice, you will also lose that role color.\n\nIf you have a role color and want to remove it, pick the `None` option in the dropdown menu below. This will return you back to inheriting your role color from your highest ranking role.")
+
+        color_channel = self.bot.get_channel(ROLE_COLOR_CHANNEL_ID)
+        if color_channel:
+            await color_channel.send(embed=embed,file=file,view=ColorsView())
+            await interaction.followup.send(f"{CHECK_EMOJI} thing is created.", ephemeral=True)
+        else:
+            await interaction.followup.send(f"{WARNING_EMOJI} Color channel with ID {ROLE_COLOR_CHANNEL_ID} not found.", ephemeral=True)
