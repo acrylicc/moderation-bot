@@ -9,8 +9,6 @@ import os
 class Colors(discord.ui.Select):
     def __init__(self):
         options = [
-            discord.SelectOption(label="Art Panel", emoji=ART_PANEL_ROLE_EMOJI),
-            discord.SelectOption(label="Moderator", emoji=MOD_ROLE_EMOJI),
             discord.SelectOption(label="Special", emoji=SPECIAL_ROLE_EMOJI),
             discord.SelectOption(label="Super Supporter", emoji=SUPER_SUPPORTER_ROLE_EMOJI),
             discord.SelectOption(label="Jira Enthusiast", emoji=MEMBER_TIER_2_ROLE_EMOJI),
@@ -37,25 +35,11 @@ class Colors(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction):
         user_roles = [role.id for role in interaction.user.roles]
         
-        if CREATORS_ROLE_ID in user_roles or SALAMI_ROLE_ID in user_roles or ACRYLIC_ROLE_ID in user_roles:
+        if CREATORS_ROLE_ID in user_roles or SALAMI_ROLE_ID in user_roles or ACRYLIC_ROLE_ID in user_roles or MOD_ROLE_ID in user_roles or ART_PANEL_ROLE_ID in user_roles:
             await interaction.response.send_message(f"{X_EMOJI} You have a role that is ranked higher than all role colors, meaning you cannot change your role color.", ephemeral=True)
             return
 
-        if self.values[0] == "Art Panel":
-            if ART_PANEL_ROLE_ID in user_roles:
-                await self.remove_colors(user_roles,interaction)
-                await interaction.user.add_roles(interaction.guild.get_role(ART_PANEL_COLOR_ROLE_ID))
-                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
-            else:
-                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
-        elif self.values[0] == "Moderator":
-            if MOD_ROLE_ID in user_roles:
-                await self.remove_colors(user_roles,interaction)
-                await interaction.user.add_roles(interaction.guild.get_role(MOD_COLOR_ROLE_ID))
-                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
-            else:
-                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
-        elif self.values[0] == "Special":
+        if self.values[0] == "Special":
             if SPECIAL_ROLE_ID in user_roles:
                 await self.remove_colors(user_roles,interaction)
                 await interaction.user.add_roles(interaction.guild.get_role(SPECIAL_COLOR_ROLE_ID))

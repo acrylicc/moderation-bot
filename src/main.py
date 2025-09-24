@@ -106,11 +106,7 @@ async def on_member_update(before, after):
                     count = count + 1
 
         # If a user has a color role for a normla role that they no longer have
-        if ART_PANEL_COLOR_ROLE_ID in roles and ART_PANEL_ROLE_ID not in roles:
-            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(ART_PANEL_COLOR_ROLE_ID))
-        if MOD_COLOR_ROLE_ID in roles and MOD_ROLE_ID not in roles:
-            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(MOD_COLOR_ROLE_ID))
-        elif SPECIAL_COLOR_ROLE_ID in roles and SPECIAL_ROLE_ID not in roles:
+        if SPECIAL_COLOR_ROLE_ID in roles and SPECIAL_ROLE_ID not in roles:
             await after.remove_roles(bot.get_guild(GUILD_ID).get_role(SPECIAL_COLOR_ROLE_ID))
         elif SUPER_SUPPORTER_COLOR_ROLE_ID in roles and SUPER_SUPPORTER_ROLE_ID not in roles:
             await after.remove_roles(bot.get_guild(GUILD_ID).get_role(SUPER_SUPPORTER_COLOR_ROLE_ID))
