@@ -18,8 +18,8 @@ intents.message_content = True
 intents.members = True
 
 def load_strikes():
-        with open(os.path.abspath('strikes.json'), "r") as f:
-            return json.load(f)
+    with open(os.path.abspath('strikes.json'), "r") as f:
+        return json.load(f)
 
 def save_strikes(data):
     with open(os.path.abspath('strikes.json'), "w") as f:
@@ -126,13 +126,16 @@ async def on_member_update(before, after):
             await after.remove_roles(bot.get_guild(GUILD_ID).get_role(SUB_COLOR_ROLE_ID))
         elif BOOSTER_COLOR_ROLE_ID in roles and BOOSTER_ROLE_ID not in roles:
             await after.remove_roles(bot.get_guild(GUILD_ID).get_role(BOOSTER_COLOR_ROLE_ID))
+        elif MUSICIAN_COLOR_ROLE_ID in roles and MUSICIAN_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(MUSICIAN_COLOR_ROLE_ID))
         elif ARTIST_COLOR_ROLE_ID in roles and ARTIST_ROLE_ID not in roles:
             await after.remove_roles(bot.get_guild(GUILD_ID).get_role(ARTIST_COLOR_ROLE_ID))
         elif GOOBER_2_COLOR_ROLE_ID in roles and GOOBER_2_ROLE_ID not in roles:
             await after.remove_roles(bot.get_guild(GUILD_ID).get_role(GOOBER_2_COLOR_ROLE_ID))
         elif GOOBER_COLOR_ROLE_ID in roles and GOOBER_ROLE_ID not in roles:
-            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(GOOBER_COLOR_ROLE_ID))            
-
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(GOOBER_COLOR_ROLE_ID))
+        elif PINGS_COLOR_ROLE_ID in roles and POLL_PINGS_ROLE_ID not in roles and EVENT_PINGS_ROLE_ID not in roles and MERCH_PINGS_ROLE_ID not in roles and GIVEAWAY_PINGS_ROLE_ID not in roles and STREAM_PINGS_ROLE_ID not in roles and SECOND_CHANNEL_PINGS_ROLE_ID not in roles and VOD_CHANNEL_PINGS_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(PINGS_COLOR_ROLE_ID))
 
 token = os.getenv("bot_token")
 bot.run(token)

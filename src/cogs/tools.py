@@ -5,6 +5,7 @@ from cogs.ids import *
 from datetime import timedelta, datetime, timezone
 import json
 import os
+import io
 
 class Colors(discord.ui.Select):
     def __init__(self):
@@ -19,9 +20,11 @@ class Colors(discord.ui.Select):
             discord.SelectOption(label="Tier 1", emoji=SUB_TIER_1_ROLE_EMOJI),
             discord.SelectOption(label="Twitch Sub", emoji=SUB_ROLE_EMOJI),
             discord.SelectOption(label="Booster", emoji=BOOSTER_ROLE_EMOJI),
+            discord.SelectOption(label="Musician", emoji=MUSICIAN_ROLE_EMOJI),
             discord.SelectOption(label="Artist", emoji=ARTIST_ROLE_EMOJI),
             discord.SelectOption(label="Goober 2", emoji=GOOBER_2_ROLE_EMOJI),
             discord.SelectOption(label="Goober", emoji=GOOBER_ROLE_EMOJI),
+            discord.SelectOption(label="Pings", emoji=PUSHPIN_EMOJI),
             discord.SelectOption(label="None", emoji=X_EMOJI)
         ]
         super().__init__(placeholder="Choose an option...", min_values=1, max_values=1, options=options,custom_id="colors")
@@ -109,6 +112,13 @@ class Colors(discord.ui.Select):
                 await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
             else:
                 await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Musician":
+            if MUSICIAN_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(MUSICIAN_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
         elif self.values[0] == "Artist":
             if ARTIST_ROLE_ID in user_roles:
                 await self.remove_colors(user_roles,interaction)
@@ -130,6 +140,13 @@ class Colors(discord.ui.Select):
                 await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
             else:
                 await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Pings":
+            if POLL_PINGS_ROLE_ID in user_roles or EVENT_PINGS_ROLE_ID in user_roles or MERCH_PINGS_ROLE_ID in user_roles or GIVEAWAY_PINGS_ROLE_ID in user_roles or STREAM_PINGS_ROLE_ID in user_roles or SECOND_CHANNEL_PINGS_ROLE_ID in user_roles or VOD_CHANNEL_PINGS_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(PINGS_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `a notifcation role` to set your role color to: {self.values[0]}.", ephemeral=True)
         elif self.values[0] == "None":
             await self.remove_colors(user_roles,interaction)
             await interaction.response.send_message(f"{CHECK_EMOJI} You have reset your role color to its defualt.", ephemeral=True)
@@ -355,9 +372,74 @@ class ToolsCog(commands.Cog):
             hours_left = int(remaining.total_seconds() // 3600)
             await interaction.followup.send(f"{X_EMOJI} You have only been in the server for {tenure.days} days.\nYou need **{hours_left} more hours** to qualify.", ephemeral=True)
 
+    @tools.command(name="musician", description="Apply for Musician role.")
+    async def musician(self, interaction: discord.Interaction, file: discord.Attachment = None, link: str = None):
+        await interaction.response.send_message("Sending application...", ephemeral=True)
+
+        author_roles = [role.id for role in interaction.user.roles]
+
+        if GOOBER_ROLE_ID not in author_roles:
+            await interaction.followup.send(f"{X_EMOJI} You must have Goober role to use this command.", ephemeral=True)
+            return
+        
+        if MUSICIAN_ROLE_ID in author_roles:
+            await interaction.followup.send(f"{X_EMOJI} You already have Musician role.", ephemeral=True)
+            return
+
+        if not file and not link:
+            await interaction.followup.send(f"{X_EMOJI} You must pass either a file or a link.", ephemeral=True)
+            return
+
+        # Check for audio content type
+        if file:
+            file.content_type
+            if not file.content_type or not file.content_type.startswith("audio/"):
+                await interaction.followup.send(f"{WARNING_EMOJI} Please upload a valid audio file (MP3, WAV, etc.)", ephemeral=True)
+                return
+
+        # Get the target channel
+        apply_channel = self.bot.get_channel(MUSICIAN_APPLY_CHANNEL_ID)
+        if not apply_channel:
+            await interaction.followup.send(f"{WARNING_EMOJI} Apply channel with ID {MUSICIAN_APPLY_CHANNEL_ID} not found.", ephemeral=True)
+            return
+
+        # Create an embed with the image
+        embed = discord.Embed(
+            title=f"{MUSICIAN_ROLE_EMOJI} New Application",
+            description=f"Uploaded by {interaction.user.mention}",
+            color=discord.Color.blue()
+        )
+        
+        if link:
+            embed.description = f"{embed.description}\n{link}"
+
+        if file:
+            file_bytes = await file.read()
+            discord_file = discord.File(io.BytesIO(file_bytes), filename=file.filename)
+            await apply_channel.send(embed=embed, file=discord_file)
+        else:
+            await apply_channel.send(embed=embed)
+
+        embed = discord.Embed(
+            title=f"{MUSICIAN_ROLE_EMOJI} New Musician Application",
+            description=f"**User:** {interaction.user.mention}",
+            color=discord.Color.purple()
+        )
+        embed.set_thumbnail(url=interaction.user.avatar.url if interaction.user.avatar else interaction.user.default_avatar.url)
+        embed.timestamp = discord.utils.utcnow()
+
+        # Send to log channel
+        log_channel = self.bot.get_channel(LOG_CHANNEL_ID)
+        if log_channel:
+            await log_channel.send(embed=embed)
+        else:
+            await interaction.followup.send(f"{WARNING_EMOJI} Log channel with ID {LOG_CHANNEL_ID} not found.", ephemeral=True)
+
+        # Confirm to user
+        await interaction.followup.send(f"{CHECK_EMOJI} Your application for Musician role has been sent.", ephemeral=True)
 
     @tools.command(name="artist", description="Apply for Artist role.")
-    async def uploadfile(self, interaction: discord.Interaction, file: discord.Attachment):
+    async def artist(self, interaction: discord.Interaction, file: discord.Attachment):
         await interaction.response.send_message("Sending application...", ephemeral=True)
 
         author_roles = [role.id for role in interaction.user.roles]
@@ -376,9 +458,9 @@ class ToolsCog(commands.Cog):
             return
 
         # Get the target channel
-        apply_channel = self.bot.get_channel(APPLY_CHANNEL_ID)
+        apply_channel = self.bot.get_channel(ARTIST_APPLY_CHANNEL_ID)
         if not apply_channel:
-            await interaction.followup.send(f"{WARNING_EMOJI} Apply channel with ID {APPLY_CHANNEL_ID} not found.", ephemeral=True)
+            await interaction.followup.send(f"{WARNING_EMOJI} Apply channel with ID {ARTIST_APPLY_CHANNEL_ID} not found.", ephemeral=True)
             return
 
         # Create an embed with the image
@@ -427,22 +509,38 @@ class ToolsCog(commands.Cog):
             await interaction.followup.send(f"{X_EMOJI} Invalid message ID format.", ephemeral=True)
             return
         
-        apply_channel = self.bot.get_channel(APPLY_CHANNEL_ID)
-        if not apply_channel:
-            await interaction.followup.send(f"{WARNING_EMOJI} Apply channel with ID {APPLY_CHANNEL_ID} not found.", ephemeral=True)
+        artist_apply_channel = self.bot.get_channel(ARTIST_APPLY_CHANNEL_ID)
+        if not artist_apply_channel:
+            await interaction.followup.send(f"{WARNING_EMOJI} Apply channel with ID {ARTIST_APPLY_CHANNEL_ID} not found.", ephemeral=True)
+            return
+        music_apply_channel = self.bot.get_channel(MUSICIAN_APPLY_CHANNEL_ID)
+        if not music_apply_channel:
+            await interaction.followup.send(f"{WARNING_EMOJI} Apply channel with ID {MUSICIAN_APPLY_CHANNEL_ID} not found.", ephemeral=True)
             return
         
         try:
-            message = await apply_channel.fetch_message(message_id_int)
+            message = await artist_apply_channel.fetch_message(message_id_int)
             await message.delete()
+            is_for_artist = True
         except discord.NotFound:
-            await interaction.followup.send(f"{WARNING_EMOJI} Message not found in the application channel.", ephemeral=True)
-            return
+            try:
+                message = await music_apply_channel.fetch_message(message_id_int)
+                await message.delete()
+                is_for_artist = False
+            except discord.NotFound:
+                await interaction.followup.send(f"{WARNING_EMOJI} Message not found in the application channel.", ephemeral=True)
+                return
+            except discord.Forbidden:
+                await interaction.followup.send(f"{X_EMOJI} I don't have permission to delete that message.", ephemeral=True)
+                return
         except discord.Forbidden:
             await interaction.followup.send(f"{X_EMOJI} I don't have permission to delete that message.", ephemeral=True)
             return
         
-        title = f"{CHECK_EMOJI} Artist Application Accepted" if accepted else f"{X_EMOJI} Artist Application Denied"
+        if is_for_artist:
+            title = f"{CHECK_EMOJI} Artist Application Accepted" if accepted else f"{X_EMOJI} Artist Application Denied"
+        else:
+            title = f"{CHECK_EMOJI} Musician Application Accepted" if accepted else f"{X_EMOJI} Musician Application Denied"
         color = discord.Color.green() if accepted else discord.Color.red()
 
         embed = discord.Embed(
@@ -468,9 +566,12 @@ class ToolsCog(commands.Cog):
 
         # If accepted, assign the role
         if accepted:
-            role = interaction.guild.get_role(ARTIST_ROLE_ID)
+            if is_for_artist:
+                role = interaction.guild.get_role(ARTIST_ROLE_ID)
+            else:
+                role = interaction.guild.get_role(MUSICIAN_ROLE_ID)
             if not role:
-                await interaction.followup.send(f"{WARNING_EMOJI} Role not found. Check the ARTIST_ROLE_ID. If you are seeing this, please report this to staff via `/tools report`.", ephemeral=True)
+                await interaction.followup.send(f"{WARNING_EMOJI} Role not found. Check the ARTIST_ROLE_ID and or MUSICIAN_ROLE_ID. If you are seeing this, please report this to staff via `/tools report`.", ephemeral=True)
                 return
             try:
                 await member.add_roles(role, reason=f"Accepted by {interaction.user} - {reason}")
@@ -543,6 +644,7 @@ class ToolsCog(commands.Cog):
         embed_community.add_field(inline=True, name="", value=f"{SUB_TIER_1_ROLE_EMOJI}{SUB_TIER_1_ROLE_MENTION}{SUB_TIER_1_ROLE_EMOJI}\nAutomatically granted to those who are a Tier 1, Twitch sub")
         embed_community.add_field(inline=True, name="", value=f"{SUB_ROLE_EMOJI}{SUB_ROLE_MENTION}{SUB_ROLE_EMOJI}\nAutomatically granted to anyone who is a Twitch sub, regardless of tier. Comes with perms to change your nickname")
         embed_community.add_field(inline=True, name="", value=f"{BOOSTER_ROLE_EMOJI}{BOOSTER_ROLE_MENTION}{BOOSTER_ROLE_EMOJI}\nAutomatically granted to those who boost the server. Comes with perms to change your nickname")
+        embed_community.add_field(inline=True, name="", value=f"{MUSICIAN_ROLE_EMOJI}{MUSICIAN_ROLE_MENTION}{MUSICIAN_ROLE_EMOJI}\nApply for this role using `/tools musician` and send your own music. Don't worry, your music isn't being judged on skill, the application process is just to prevent low effort content")
         embed_community.add_field(inline=True, name="", value=f"{ARTIST_ROLE_EMOJI}{ARTIST_ROLE_MENTION}{ARTIST_ROLE_EMOJI}\nApply for this role using `/tools artist` and send your own art. Don't worry, your art isn't being judged on skill, the application process is just to prevent low effort, stolen, and or A.I. art")
         embed_community.add_field(inline=True, name="", value=f"{GOOBER_2_ROLE_EMOJI}{GOOBER_2_ROLE_MENTION}{GOOBER_2_ROLE_EMOJI}\nRun `/tools goober2` at least 3 weeks after joining and you will be granted this role. Comes with perms to create polls, change your nickname, and start activities in voice chats")
         embed_community.add_field(inline=True, name="", value=f"{GOOBER_ROLE_EMOJI}{GOOBER_ROLE_MENTION}{GOOBER_ROLE_EMOJI}\nRun `/tools goober` at least 3 days after joining and you will be granted this role. Comes with extended reaction perms, along with image and embed perms")

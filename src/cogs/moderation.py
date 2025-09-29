@@ -83,9 +83,12 @@ class ModerationCog(commands.Cog):
         # Prevent banning users with protected roles
         try:
             target_roles = [role.id for role in member.roles]
-            if any(role_id in PROTECTED_ROLE_IDS for role_id in target_roles):
-                await interaction.followup.send(f"{X_EMOJI} You cannot ban this user because they have a protected role.", ephemeral=True)
-                return
+            if any(role_id in PROTECTED_ROLE_IDS for role_id in target_roles) or ART_PANEL_ROLE_ID in target_roles:
+                if CREATORS_ROLE_ID in author_roles and CREATORS_ROLE_ID not in target_roles:
+                    pass
+                else:
+                    await interaction.followup.send(f"{X_EMOJI} You cannot ban this user because they have a protected role.", ephemeral=True)
+                    return
         except:
             pass
 
@@ -191,8 +194,11 @@ class ModerationCog(commands.Cog):
         try:
             target_roles = [role.id for role in member.roles]
             if any(role_id in PROTECTED_ROLE_IDS for role_id in target_roles):
-                await interaction.followup.send(f"{X_EMOJI} You cannot timeout this user because they have a protected role.", ephemeral=True)
-                return
+                if CREATORS_ROLE_ID in author_roles and CREATORS_ROLE_ID not in target_roles:
+                    pass
+                else:
+                    await interaction.followup.send(f"{X_EMOJI} You cannot timeout this user because they have a protected role.", ephemeral=True)
+                    return
         except:
             pass
 
@@ -253,8 +259,11 @@ class ModerationCog(commands.Cog):
         try:
             target_roles = [role.id for role in member.roles]
             if any(role_id in PROTECTED_ROLE_IDS for role_id in target_roles):
-                await interaction.followup.send(f"{X_EMOJI} You cannot timeout this user because they have a protected role.", ephemeral=True)
-                return
+                if CREATORS_ROLE_ID in author_roles and CREATORS_ROLE_ID not in target_roles:
+                    pass
+                else:
+                    await interaction.followup.send(f"{X_EMOJI} You cannot timeout this user because they have a protected role.", ephemeral=True)
+                    return
         except:
             pass
 
@@ -332,8 +341,11 @@ class ModerationCog(commands.Cog):
             if isinstance(target_message.author, discord.Member):
                 target_roles = [role.id for role in target_message.author.roles]
                 if any(rid in PROTECTED_ROLE_IDS for rid in target_roles):
-                    await interaction.followup.send(f"{X_EMOJI} Cannot delete messages from protected users.", ephemeral=True)
-                    return
+                    if CREATORS_ROLE_ID in author_roles and CREATORS_ROLE_ID not in target_roles:
+                        pass
+                    else:
+                        await interaction.followup.send(f"{X_EMOJI} Cannot delete messages from protected users.", ephemeral=True)
+                        return
 
             # Create response embed
             embed = discord.Embed(
@@ -431,8 +443,11 @@ class ModerationCog(commands.Cog):
         try:
             target_roles = [role.id for role in member.roles]
             if any(role_id in PROTECTED_ROLE_IDS for role_id in target_roles):
-                await interaction.followup.send(f"{X_EMOJI} You cannot strike this user because they have a protected role.", ephemeral=True)
-                return
+                if CREATORS_ROLE_ID in author_roles and CREATORS_ROLE_ID not in target_roles:
+                    pass
+                else:
+                    await interaction.followup.send(f"{X_EMOJI} You cannot strike this user because they have a protected role.", ephemeral=True)
+                    return
         except Exception:
             pass
 
@@ -497,7 +512,7 @@ class ModerationCog(commands.Cog):
             # Check for 4 strikes (ban)
             if len(data[guild_id][user_id]) >= 4:
                 ban_embed = discord.Embed(
-                    title=f"{LOCK_EMOJI} User Banned",
+                    title=f"{LOCK_EMOJI} User {"Soft-Banned" if ART_PANEL_ROLE_ID in target_roles else "Banned"}",
                     description=(
                         f"**User:** {member.mention}\n"
                         f"**Reason:** Reached 4 active strikes.\n"
@@ -514,7 +529,10 @@ class ModerationCog(commands.Cog):
                     await interaction.followup.send(f"{WARNING_EMOJI} Couldn't DM {member.mention}. They might have DMs disabled.", ephemeral=True)
 
                 try:
-                    await member.ban(reason="Reached 4 active strikes.", delete_message_seconds=0)
+                    if ART_PANEL_ROLE_ID in target_roles:
+                        await member.timeout(discord.utils.utcnow() + self.parse_duration('20d'))
+                    else:
+                        await member.ban(reason="Reached 4 active strikes.", delete_message_seconds=0)
                     await interaction.followup.send(embed=ban_embed, ephemeral=True)
                     if not silent:
                         await interaction.channel.send(embed=ban_embed)
