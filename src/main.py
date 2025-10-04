@@ -79,7 +79,23 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     mention = f'<@{bot.user.id}>'
-    if mention in message.content:
+    if mention in message.content and 'today' in message.content.lower():
+        weekday = datetime.today().weekday()
+        if weekday == 0:
+            await message.reply("https://tenor.com/view/mako-mako-mankanshoku-kill-la-kill-monday-mako-monday-gif-78982588398866667")
+        elif weekday == 1:
+            await message.reply("https://tenor.com/view/mako-mako-mankanshoku-kill-la-kill-tuesday-mako-tuesday-gif-17072428433246127365")
+        elif weekday == 2:
+            await message.reply("https://tenor.com/view/mako-mako-mankanshoku-kill-la-kill-wednesday-mako-wednesday-gif-3049094210901091093")
+        elif weekday == 3:
+            await message.reply("https://tenor.com/view/mako-mako-mankanshoku-kill-la-kill-thursday-mako-thursday-gif-8626784389241889032")
+        elif weekday == 4:
+            await message.reply("https://tenor.com/view/mako-mako-mankanshoku-kill-la-kill-friday-mako-friday-gif-10541299650248512573")
+        elif weekday == 5:
+            await message.reply("https://tenor.com/view/mako-kill-la-kill-mako-mankanshoku-saturday-mako-saturday-gif-7305386381456943983")
+        elif weekday == 6:
+            await message.reply("https://tenor.com/view/mako-mako-mankanshoku-kill-la-kill-sunday-mako-sunday-gif-16617755993563860585")
+    elif mention in message.content:
         await message.reply("hi my name jira")
 
 @bot.event
@@ -126,6 +142,8 @@ async def on_member_update(before, after):
             await after.remove_roles(bot.get_guild(GUILD_ID).get_role(SUB_COLOR_ROLE_ID))
         elif BOOSTER_COLOR_ROLE_ID in roles and BOOSTER_ROLE_ID not in roles:
             await after.remove_roles(bot.get_guild(GUILD_ID).get_role(BOOSTER_COLOR_ROLE_ID))
+        elif CONTRIBUTOR_COLOR_ROLE_ID in roles and CONTRIBUTOR_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(CONTRIBUTOR_COLOR_ROLE_ID))
         elif MUSICIAN_COLOR_ROLE_ID in roles and MUSICIAN_ROLE_ID not in roles:
             await after.remove_roles(bot.get_guild(GUILD_ID).get_role(MUSICIAN_COLOR_ROLE_ID))
         elif ARTIST_COLOR_ROLE_ID in roles and ARTIST_ROLE_ID not in roles:

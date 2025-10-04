@@ -20,6 +20,7 @@ class Colors(discord.ui.Select):
             discord.SelectOption(label="Tier 1", emoji=SUB_TIER_1_ROLE_EMOJI),
             discord.SelectOption(label="Twitch Sub", emoji=SUB_ROLE_EMOJI),
             discord.SelectOption(label="Booster", emoji=BOOSTER_ROLE_EMOJI),
+            discord.SelectOption(label="Contributor", emoji=CONTRIBUTOR_ROLE_EMOJI),
             discord.SelectOption(label="Musician", emoji=MUSICIAN_ROLE_EMOJI),
             discord.SelectOption(label="Artist", emoji=ARTIST_ROLE_EMOJI),
             discord.SelectOption(label="Goober 2", emoji=GOOBER_2_ROLE_EMOJI),
@@ -109,6 +110,13 @@ class Colors(discord.ui.Select):
             if BOOSTER_ROLE_ID in user_roles:
                 await self.remove_colors(user_roles,interaction)
                 await interaction.user.add_roles(interaction.guild.get_role(BOOSTER_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Contributor":
+            if CONTRIBUTOR_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(CONTRIBUTOR_COLOR_ROLE_ID))
                 await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
             else:
                 await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
@@ -644,6 +652,7 @@ class ToolsCog(commands.Cog):
         embed_community.add_field(inline=True, name="", value=f"{SUB_TIER_1_ROLE_EMOJI}{SUB_TIER_1_ROLE_MENTION}{SUB_TIER_1_ROLE_EMOJI}\nAutomatically granted to those who are a Tier 1, Twitch sub")
         embed_community.add_field(inline=True, name="", value=f"{SUB_ROLE_EMOJI}{SUB_ROLE_MENTION}{SUB_ROLE_EMOJI}\nAutomatically granted to anyone who is a Twitch sub, regardless of tier. Comes with perms to change your nickname")
         embed_community.add_field(inline=True, name="", value=f"{BOOSTER_ROLE_EMOJI}{BOOSTER_ROLE_MENTION}{BOOSTER_ROLE_EMOJI}\nAutomatically granted to those who boost the server. Comes with perms to change your nickname")
+        embed_community.add_field(inline=True, name="", value=f"{CONTRIBUTOR_ROLE_EMOJI}{CONTRIBUTOR_ROLE_MENTION}{CONTRIBUTOR_ROLE_EMOJI}\nGranted to those who have contributed to the channel in some way.")
         embed_community.add_field(inline=True, name="", value=f"{MUSICIAN_ROLE_EMOJI}{MUSICIAN_ROLE_MENTION}{MUSICIAN_ROLE_EMOJI}\nApply for this role using `/tools musician` and send your own music. Don't worry, your music isn't being judged on skill, the application process is just to prevent low effort content")
         embed_community.add_field(inline=True, name="", value=f"{ARTIST_ROLE_EMOJI}{ARTIST_ROLE_MENTION}{ARTIST_ROLE_EMOJI}\nApply for this role using `/tools artist` and send your own art. Don't worry, your art isn't being judged on skill, the application process is just to prevent low effort, stolen, and or A.I. art")
         embed_community.add_field(inline=True, name="", value=f"{GOOBER_2_ROLE_EMOJI}{GOOBER_2_ROLE_MENTION}{GOOBER_2_ROLE_EMOJI}\nRun `/tools goober2` at least 3 weeks after joining and you will be granted this role. Comes with perms to create polls, change your nickname, and start activities in voice chats")
