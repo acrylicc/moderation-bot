@@ -392,7 +392,7 @@ class ToolsCog(commands.Cog):
     async def goober3(self, interaction: discord.Interaction):
         ready_to_release = False
         if ready_to_release == False:
-            await interaction.followup.send(f"{X_EMOJI} Goober 3 role has not been released yet, you cannot claim this role.", ephemeral=True)
+            await interaction.response.send_message(f"{X_EMOJI} Goober 3 role has not been released yet, you cannot claim this role.", ephemeral=True)
             return
         else:
             await interaction.response.send_message("Checking if you are eligble...", ephemeral=True)
