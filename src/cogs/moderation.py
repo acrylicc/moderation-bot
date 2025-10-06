@@ -548,12 +548,15 @@ class ModerationCog(commands.Cog):
             elif len(data[guild_id][user_id]) >= 2:
                 goober_role = interaction.guild.get_role(GOOBER_ROLE_ID)
                 goober_2_role = interaction.guild.get_role(GOOBER_2_ROLE_ID)
+                goober_3_role = interaction.guild.get_role(GOOBER_3_ROLE_ID)
 
                 try:
                     if goober_role in member.roles:
                         await member.remove_roles(goober_role, reason="Reached 2+ active strikes.")
                     if goober_2_role in member.roles:
                         await member.remove_roles(goober_2_role, reason="Reached 2+ active strikes.")
+                    if goober_3_role in member.roles:
+                        await member.remove_roles(goober_3_role, reason="Reached 2+ active strikes.")
                 except Exception as e:
                     await interaction.followup.send(f"{WARNING_EMOJI} Could not remove Goober roles: {e}", ephemeral=True)
 

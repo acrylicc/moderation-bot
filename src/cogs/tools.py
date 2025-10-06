@@ -23,6 +23,7 @@ class Colors(discord.ui.Select):
             discord.SelectOption(label="Contributor", emoji=CONTRIBUTOR_ROLE_EMOJI),
             discord.SelectOption(label="Musician", emoji=MUSICIAN_ROLE_EMOJI),
             discord.SelectOption(label="Artist", emoji=ARTIST_ROLE_EMOJI),
+            discord.SelectOption(label="Goober 3", emoji=GOOBER_3_ROLE_EMOJI),
             discord.SelectOption(label="Goober 2", emoji=GOOBER_2_ROLE_EMOJI),
             discord.SelectOption(label="Goober", emoji=GOOBER_ROLE_EMOJI),
             discord.SelectOption(label="Pings", emoji=PUSHPIN_EMOJI),
@@ -131,6 +132,13 @@ class Colors(discord.ui.Select):
             if ARTIST_ROLE_ID in user_roles:
                 await self.remove_colors(user_roles,interaction)
                 await interaction.user.add_roles(interaction.guild.get_role(ARTIST_COLOR_ROLE_ID))
+                await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
+        elif self.values[0] == "Goober 3":
+            if GOOBER_3_ROLE_ID in user_roles:
+                await self.remove_colors(user_roles,interaction)
+                await interaction.user.add_roles(interaction.guild.get_role(GOOBER_3_COLOR_ROLE_ID))
                 await interaction.response.send_message(f"{CHECK_EMOJI} You have now set your role color to: {self.values[0]}.", ephemeral=True)
             else:
                 await interaction.response.send_message(f"{X_EMOJI} You must have `{self.values[0]}` to set your role color to: {self.values[0]}.", ephemeral=True)
@@ -379,6 +387,80 @@ class ToolsCog(commands.Cog):
             remaining = required_tenure - tenure
             hours_left = int(remaining.total_seconds() // 3600)
             await interaction.followup.send(f"{X_EMOJI} You have only been in the server for {tenure.days} days.\nYou need **{hours_left} more hours** to qualify.", ephemeral=True)
+
+    @tools.command(name="goober3", description="Check if you are eligble for Goober 3 role.")
+    async def goober3(self, interaction: discord.Interaction):
+        ready_to_release = False
+        if ready_to_release == False:
+            await interaction.followup.send(f"{X_EMOJI} Goober 3 role has not been released yet, you cannot claim this role.", ephemeral=True)
+            return
+        else:
+            await interaction.response.send_message("Checking if you are eligble...", ephemeral=True)
+
+            now = datetime.now(timezone.utc)
+            joined_at = interaction.user.joined_at
+
+            if not joined_at:
+                await interaction.followup.send(f"{WARNING_EMOJI} Couldn't determine when you joined, please try again. If this continues to happen, please report this to staff via `/tools report`.", ephemeral=True)
+                return
+
+            tenure = now - joined_at
+            required_tenure = timedelta(days=90)
+
+            user_id = str(interaction.user.id)
+            data = self.load_strikes()
+            guild_id = str(interaction.guild.id)
+
+            self.clean_expired_strikes(data)
+
+            strikes = data.get(guild_id, {}).get(user_id, [])
+
+            if tenure >= required_tenure:
+                goober = interaction.guild.get_role(GOOBER_ROLE_ID)
+                goober_2 = interaction.guild.get_role(GOOBER_2_ROLE_ID)
+                role = interaction.guild.get_role(GOOBER_3_ROLE_ID)
+                if not role:
+                    await interaction.followup.send(f"{WARNING_EMOJI} Role not found. Check the GOOBER_3_ROLE_ID. If you are seeing this, please report this to staff via `/tools report`.", ephemeral=True)
+                    return
+
+                if role in interaction.user.roles:
+                    await interaction.followup.send(f"{X_EMOJI} You already have Goober 3 role.", ephemeral=True)
+                    return
+                
+                if goober not in interaction.user.roles or goober_2 not in interaction.user.roles:
+                    await interaction.followup.send(f"{X_EMOJI} You must have Goober role and Goober 2 before you can get Goober 3 role.", ephemeral=True)
+                    return
+
+                if int(len(strikes)) >= 2:
+                    await interaction.followup.send(f"{X_EMOJI} You currently have 2+ active strikes and cannot obtain Goober 3 role.", ephemeral=True)
+                    return
+
+                try:
+                    await interaction.user.add_roles(role, reason="Met 3-month server tenure requirement")
+                    await interaction.followup.send(f"{CHECK_EMOJI} You have been in the server for {tenure.days} days and as such have been promoted to Goober 3 role.", ephemeral=True)
+
+                    embed = discord.Embed(
+                        title=f"{GOOBER_3_ROLE_EMOJI} User Promoted to Goober 3",
+                        description=f"**User:** {interaction.user.mention}",
+                        color=discord.Color.from_rgb(185, 59, 141)
+                    )
+                    embed.set_thumbnail(url=interaction.user.avatar.url if interaction.user.avatar else interaction.user.default_avatar.url)
+                    embed.timestamp = discord.utils.utcnow()
+
+                    # Send to log channel
+                    log_channel = self.bot.get_channel(LOG_CHANNEL_ID)
+                    if log_channel:
+                        await log_channel.send(embed=embed)
+                    else:
+                        await interaction.followup.send(f"{WARNING_EMOJI} Log channel with ID {LOG_CHANNEL_ID} not found.", ephemeral=True)
+
+                except discord.Forbidden:
+                    await interaction.followup.send(f"{WARNING_EMOJI} Failed to assign role to {interaction.user.mention}. Check my permissions. If you are seeing this, please report this to staff via `/tools report`.", ephemeral=True)
+            else:
+                remaining = required_tenure - tenure
+                hours_left = int(remaining.total_seconds() // 3600)
+                await interaction.followup.send(f"{X_EMOJI} You have only been in the server for {tenure.days} days.\nYou need **{hours_left} more hours** to qualify.", ephemeral=True)
+
 
     @tools.command(name="musician", description="Apply for Musician role.")
     async def musician(self, interaction: discord.Interaction, file: discord.Attachment = None, link: str = None):

@@ -148,6 +148,8 @@ async def on_member_update(before, after):
             await after.remove_roles(bot.get_guild(GUILD_ID).get_role(MUSICIAN_COLOR_ROLE_ID))
         elif ARTIST_COLOR_ROLE_ID in roles and ARTIST_ROLE_ID not in roles:
             await after.remove_roles(bot.get_guild(GUILD_ID).get_role(ARTIST_COLOR_ROLE_ID))
+        elif GOOBER_3_COLOR_ROLE_ID in roles and GOOBER_3_ROLE_ID not in roles:
+            await after.remove_roles(bot.get_guild(GUILD_ID).get_role(GOOBER_3_COLOR_ROLE_ID))
         elif GOOBER_2_COLOR_ROLE_ID in roles and GOOBER_2_ROLE_ID not in roles:
             await after.remove_roles(bot.get_guild(GUILD_ID).get_role(GOOBER_2_COLOR_ROLE_ID))
         elif GOOBER_COLOR_ROLE_ID in roles and GOOBER_ROLE_ID not in roles:
