@@ -709,12 +709,13 @@ class ToolsCog(commands.Cog):
         embed_exclusive.add_field(inline=False, name=f"{STAR_EMOJI} Exclusive Roles {STAR_EMOJI}", value="----------------------------\n")
         embed_exclusive.add_field(inline=True, name="", value=f"{ACRYLIC_ROLE_EMOJI}{ACRYLIC_ROLE_MENTION}{ACRYLIC_ROLE_EMOJI}\nA role exclusive to the channel owner himself, Acrylic")
         embed_exclusive.add_field(inline=True, name="", value=f"{SALAMI_ROLE_EMOJI}{SALAMI_ROLE_MENTION}{SALAMI_ROLE_EMOJI}\nA role exclusive to Salami, the artist for the videos")
-        embed_exclusive.add_field(inline=True, name="", value=f"{CREATORS_ROLE_EMOJI}{CREATORS_ROLE_MENTION}{CREATORS_ROLE_EMOJI}\nA role exclusive to the creators of the channel, its real purpose is just to group Acrylic and Salami together on the member list")
+        embed_exclusive.add_field(inline=True, name="", value=f"{CREATORS_ROLE_EMOJI}{CREATORS_ROLE_MENTION}{CREATORS_ROLE_EMOJI}\nA grouping role for the creators of the channel")
         embeds.append(embed_exclusive)
 
         embed_staff = discord.Embed(color=16772213)
         embed_staff.add_field(inline=False, name=f"{STAFF_EMOJI} Staff Roles {STAFF_EMOJI}", value="----------------------------\n")
         embed_staff.add_field(inline=True, name="", value=f"{ART_PANEL_ROLE_EMOJI}{ART_PANEL_ROLE_MENTION}{ART_PANEL_ROLE_EMOJI}\nBehind the scenes access to upcoming videos, providing feedback and suggested changes to make before the video is released publicly")
+        embed_staff.add_field(inline=True, name="", value=f"{BOT_ROLE_EMOJI}{BOT_ROLE_MENTION}{BOT_ROLE_EMOJI}\nA grouping role for all bots in the server")
         embed_staff.add_field(inline=True, name="", value=f"{MOD_ROLE_EMOJI}{MOD_ROLE_MENTION}{MOD_ROLE_EMOJI}\nAccess to <@1396161419434655855> commands. Moderates server to ensure a safe environment for everybody")
         embeds.append(embed_staff)
 

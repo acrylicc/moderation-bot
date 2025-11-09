@@ -13,6 +13,14 @@ class ModerationCog(commands.Cog):
 
     mod = app_commands.Group(name="mod", description="Jira Moderation commands")
 
+    async def in_guild(self, user_id):
+        guild = self.bot.get_guild(GUILD_ID)
+        try:
+            await guild.fetch_member(user_id)
+            return True
+        except:
+            return False
+
     def parse_duration(self, duration_str: str) -> Optional[timedelta]:
         """Parses duration strings like '10m', '2h', '1d' into timedelta."""
         try:
@@ -110,6 +118,51 @@ class ModerationCog(commands.Cog):
         # Try banning the user
         try:
             await member.ban(reason=reason,delete_message_seconds=0)
+
+            await interaction.followup.send(embed=embed, ephemeral=True)
+
+            if silent is False:
+                await interaction.followup.send(embed=embed)
+
+            # Send to log channel
+            log_channel = self.bot.get_channel(LOG_CHANNEL_ID)
+            if log_channel:
+                await log_channel.send(embed=embed)
+            else:
+                await interaction.followup.send(f"{WARNING_EMOJI} Log channel with ID {LOG_CHANNEL_ID} not found.", ephemeral=True)
+
+        except discord.Forbidden:
+            await interaction.followup.send(f"{X_EMOJI} I don't have permission to ban this user.", ephemeral=True)
+        except Exception as e:
+            await interaction.followup.send(f"{X_EMOJI} An unexpected error occurred: {str(e)}", ephemeral=True)
+
+    @mod.command(name="ban_id", description="Ban a member from the server by their user ID.")
+    async def ban_id(self, interaction: discord.Interaction, user_id: str, reason: str, silent: bool = True):
+        await interaction.response.send_message("Banning member...", ephemeral=True)
+        author_roles = [role.id for role in interaction.user.roles]
+
+        # Check if the user has the authorized role
+        if MOD_ROLE_ID not in author_roles:
+            await interaction.followup.send(f"{X_EMOJI} You don't have permission to use this command.", ephemeral=True)
+            return
+
+        # Prevent banning users with protected roles
+        if await self.in_guild(user_id=user_id):
+            await interaction.followup.send(f"{X_EMOJI} This user is still in the server, please use the normal `/mod ban` command.", ephemeral=True)
+            return
+        
+        embed = discord.Embed(
+            title=f"{LOCK_EMOJI} User ID Banned",
+            description=f"**User ID:** `{user_id}`\n**Reason:** {reason}\n**Moderator:** {interaction.user.mention}",
+            color=discord.Color.red()
+        )
+        
+        embed.timestamp = discord.utils.utcnow()
+        
+        # Try banning the user
+        try:
+            guild = self.bot.get_guild(GUILD_ID)
+            await guild.ban(discord.Object(id=int(user_id)),reason=reason,delete_message_seconds=0)
 
             await interaction.followup.send(embed=embed, ephemeral=True)
 
