@@ -390,6 +390,10 @@ class ModerationCog(commands.Cog):
                 await interaction.followup.send(f"{WARNING_EMOJI} Message not found in any accessible text channel.", ephemeral=True)
                 return
 
+            if target_message.channel.id == SYSTEM_CHANNEL_ID:
+                await interaction.followup.send(f"{X_EMOJI} Cannot delete messages from a protected channel.", ephemeral=True)
+                return
+            
             # Check if message author has protected roles
             if isinstance(target_message.author, discord.Member):
                 target_roles = [role.id for role in target_message.author.roles]
